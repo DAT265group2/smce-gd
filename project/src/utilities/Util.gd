@@ -31,7 +31,7 @@ static func copy_dir(path: String, to: String, base = null) -> bool:
 	var file_name = dir.get_next()
 	while file_name != "":
 		var abspath = dir.get_current_dir() + "/" + file_name
-		var relativ = abspath.substr(base.length())
+		var relative = abspath.substr(base.length())
 		if dir.current_is_dir():
 			dir.make_dir_recursive(to + relativ)
 			if ! copy_dir(abspath, to, base):
@@ -42,6 +42,24 @@ static func copy_dir(path: String, to: String, base = null) -> bool:
 
 	return true
 
+// converts the relative path to the absolute path and this function is called in the _download_cmake function
+static func relative_to_abs(path: String) -> String:
+    if ! path.begins_with("user://"):
+        return path
+
+    return OS.get_user_data_dir() + "/" + path.substr(7)
+
+// warning: expects system paths
+static func unzip(file: String, working_dir: String) -> bool:
+    if ! File.new().file_exists(file) || ! Directory.new().dir_exists(working_dir):
+        return false
+
+    match OS.get_name():
+        "X11", "OSX":
+            return OS.execute("tar", ["-C", working_dir, "-zxvf", file], true) == 0
+        "Windows":
+            return OS.execute("powershell.exe", ["Expand-Archive", "-Path", file, "-DestinationPath", working_dir], true) == 0
+    return false
 
 static func read_json_file(path):
 	var config = File.new()
