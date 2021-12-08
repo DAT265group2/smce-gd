@@ -29,8 +29,8 @@ var error: String = ""
 
 
 func _ready():
-	print("OS: ", OS.get_name())
-	print("Data dir: ", OS.get_user_data_dir())
+	print("OS: %s " % OS.get_name())
+	print("Data dir: %s" % OS.get_user_data_dir())
 	var cmake_exec = yield(_download_cmake(), "completed")
 	if ! cmake_exec:
 		return _error("Failed to retrieve cmake")
@@ -53,11 +53,11 @@ func _ready():
 	Global.version = version
 
 	OS.set_window_title("SMCE-gd: %s" % version)
-	print("Version: %s" % version)
-	print("Executable: %s" % exec_path)
-	print("Mode: %s" % "Debug" if OS.is_debug_build() else "Release")
-	print("User dir: %s" % Global.user_dir)
-	print()
+#	print("Version: %s" % version)
+#	print("Executable: %s" % exec_path)
+#	print("Mode: %s" % "Debug" if OS.is_debug_build() else "Release")
+#	print("User dir: %s" % Global.user_dir)
+#	print()
 	
 	var dir = Directory.new()
 	
@@ -113,9 +113,9 @@ func _on_clipboard_copy() -> void:
 	OS.clipboard = error
 
 var osi = {
-	"X11": ["cmake-3.19.6-Linux-x86_64.tar.gz", "/cmake-3.19.6-Linux-x86_64/bin/cmake"],
-	"OSX": ["cmake-3.19.6-macos-universal.tar.gz", "/cmake-3.19.6-macos-universal/CMake.app/Contents/bin/cmake"], # people using < macos 10.13 will have more problems anyways
-	"Windows": ["cmake-3.19.6-win32-x86.zip", "/cmake-3.19.6-win32-x86/bin/cmake.exe"]
+	"X11": ["cmake-3.22.0-Linux-x86_64.tar.gz", "/cmake-3.22.0-Linux-x86_64/bin/cmake"],
+	"OSX": ["cmake-3.22.0-macos-universal.tar.gz", "/cmake-3.22.0-macos-universal/CMake.app/Contents/bin/cmake"],
+	"Windows": ["cmake-3.22.0-win32-x86.zip", "/cmake-3.22.0-win32-x86/bin/cmake.exe"]
 }
 
 func _download_cmake():
@@ -123,17 +123,23 @@ func _download_cmake():
 
 	var da = osi.get(OS.get_name())
 	var file: String = da[0]
+	print(da)
+	print(da[0])
 	var file_path: String = "user://%s" % file
+	print(file_path)
 
+	# file_exists() function to check if the file we want to open exists
 	if ! File.new().file_exists(file_path):
 		print("Starting CMake download")
 		_request.download_file = file_path + ".download"
-		var url: String = "https://github.com/Kitware/CMake/releases/download/v3.19.6/%s" % file
+		var url: String = "https://github.com/Kitware/CMake/releases/download/v3.22.0/%s" % file
 		if ! _request.request(url):
 			var ret = yield(_request, "request_completed")
-			Directory.new().copy(_request.download_file, file_path)
-			Directory.new().remove(_request.download_file)
-			print("Completed CMake download")
+			var directory = Directory.new()
+			directory.copy(_request.download_file, file_path)
+			print(file_path)
+			directory.remove(_request.download_file)
+			print("CMake download completed")
 			print(ret)
 		else:
 			return null

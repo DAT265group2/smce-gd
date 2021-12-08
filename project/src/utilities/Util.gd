@@ -222,11 +222,11 @@ static func merge_dict(a: Dictionary, b: Dictionary) -> Dictionary:
 # Function to convert user:// paths to system paths
 static func user2abs(path: String) -> String:
 	if ! path.begins_with("user://"):
-		return path
+		print("path")
 
+	print(OS.get_user_data_dir() + "/" + path.substr(7))
 	return OS.get_user_data_dir() + "/" + path.substr(7)
 
-# Warning: expects system paths
 static func unzip(file: String, working_dir: String) -> bool:
 	if ! File.new().file_exists(file) || ! Directory.new().dir_exists(working_dir):
 		return false
